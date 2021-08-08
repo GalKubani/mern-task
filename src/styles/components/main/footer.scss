@@ -1,0 +1,19 @@
+.footer{
+    width: 100%;
+    height: 8rem;
+    background: $myYellow;
+}
+.footer__nav{
+    width:70%;
+    height: 100%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    a{
+        @extend %a-nav;
+    }
+    .footer-nav{
+        font-weight: 700;
+    }
+}
