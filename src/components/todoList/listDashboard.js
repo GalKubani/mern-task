@@ -8,6 +8,8 @@ const ListDashboard = () => {
 
     const [taskData, taskDispatch] = useReducer(listReducer, [])
     const [isThereAnError, setIsThereAnError] = useState(false)
+    const [taskValue, setTaskValue] = useState('')
+    const [firstClick, setFirstClick] = useState(true)
 
 
     useEffect(async () => {
@@ -15,14 +17,31 @@ const ListDashboard = () => {
             taskDispatch(getTasksAction(res))
         })
     }, [])
+    useEffect(async () => {
+        if (!firstClick) {
+            if (taskValue) { setIsThereAnError(false) }
+            else { setIsThereAnError(true) }
+        }
+        setFirstClick(false)
+    }, [taskValue])
+
+
+    const currentCounter = useMemo(() => updateCount(taskData), [taskData]);
+    const updateCount = (list) => {
+        let count = list.reduce(function (accumulator, currentValue) {
+            if (currentValue.active)
+                return accumulator += 1
+            return accumulator
+        }, 0)
+        return count
+    }
 
     const onSendTask = async (e) => {
         e.preventDefault()
-        if (!e.target.children[0].value) {
+        if (!taskValue) {
             setIsThereAnError(true)
             return
         }
-        else { setIsThereAnError(false) }
         await addATask(e.target.children[0].value).then((res) => {
             taskDispatch(addNewTask(res))
         })
@@ -30,14 +49,15 @@ const ListDashboard = () => {
 
     return (
         <div className="list-container">
-
             <form onSubmit={onSendTask}>
-                <input placeholder="enter your task" />
+                <input defaultValue='' onInput={(e) => {
+                    setTaskValue(e.target.value)
+                }} placeholder="enter your task" />
                 <DedicatedButton />
                 {isThereAnError && <div style={{ color: "red" }}>Cannot create empty task</div>}
             </form>
             <ul>
-                {/* will add counter here */}
+                <div className="counter">Currently active tasks - {currentCounter}</div>
                 {taskData.length > 0 ? taskData.map((task, i) => {
                     return <li key={i}>
                         <input type="checkbox" defaultChecked={!task.active} onChange={async (e) => {
